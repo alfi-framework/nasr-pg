@@ -1,5 +1,5 @@
 # cmake/FetchDependencies.cmake
-# Fetches external dependencies for chatter-pg.
+# Fetches external dependencies for nasr-pg.
 #
 # 1. Alfi core — header-only db/ interface (Driver, Connection, etc.)
 # 2. libpq     — PostgreSQL C client library (system dependency via pkg-config)
@@ -17,7 +17,7 @@ find_package(PkgConfig REQUIRED)
 # as a header-only INTERFACE library. We do NOT build alfi's own targets
 # (it has HTTP/router code and dependencies we don't need).
 #
-# Pin to a specific commit so chatter-pg isn't silently broken by future
+# Pin to a specific commit so nasr-pg isn't silently broken by future
 # alfi core changes. Update the GIT_TAG when adopting a new interface version.
 FetchContent_Declare(
     alfi_core
@@ -45,7 +45,7 @@ pkg_check_modules(LIBPQ REQUIRED IMPORTED_TARGET libpq)
 # ---------------------------------------------------------------------------
 # Catch2 (test framework) — fetched only when tests are built
 # ---------------------------------------------------------------------------
-if(CHATTERPG_BUILD_TESTS)
+if(NASRPG_BUILD_TESTS)
     FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git

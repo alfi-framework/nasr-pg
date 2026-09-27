@@ -1,11 +1,11 @@
-#include "chatterpg/pg_driver.hpp"
-#include "chatterpg/pg_connection.hpp"
+#include "nasrpg/pg_driver.hpp"
+#include "nasrpg/pg_connection.hpp"
 
 #include <libpq-fe.h>
 
 #include <alfi/db/db_error.hpp>
 
-namespace chatterpg {
+namespace nasrpg {
 
 std::string PgDriver::name() const {
     return "postgres";
@@ -32,4 +32,4 @@ std::unique_ptr<alfi::db::Connection> PgDriver::connect(const std::string& dsn) 
     return std::make_unique<PgConnection>(conn);
 }
 
-} // namespace chatterpg
+} // namespace nasrpg

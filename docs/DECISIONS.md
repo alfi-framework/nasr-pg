@@ -1,4 +1,6 @@
-# DECISIONS.md — chatter-pg Design Decisions
+# DECISIONS.md — nasr-pg Design Decisions
+
+> See **[OVERVIEW.md](OVERVIEW.md)** for the full documentation index.
 
 ## Pinned Alfi Core Version
 
@@ -82,7 +84,7 @@ so no data is lost — it's just not parsed into a typed variant).
 | `inet`/`cidr` | 869, 650      | Value has no network variant |
 
 > These are known gaps, not bugs. When alfi core's Value adds new variant
-> types (Phase 2+), chatter-pg should add OID cases for them.
+> types (Phase 2+), nasr-pg should add OID cases for them.
 
 ---
 
@@ -115,7 +117,7 @@ the interface contract. If needed, callers can use
 ### Connection Pooling
 
 The alfi core `Driver::connect()` returns a single connection. There is no
-connection pool abstraction in the interface. chatter-pg creates one
+connection pool abstraction in the interface. nasr-pg creates one
 libpq connection per `connect()` call. Connection pooling would need to be
 either:
 - Added to alfi core's interface (e.g. a `Pool` class), or
@@ -133,7 +135,7 @@ or a future prepared-statement layer.
 ### Async Queries
 
 The alfi core `Connection::execute()` is synchronous (returns a result, not
-a future). chatter-pg uses synchronous libpq calls accordingly. Async
+a future). nasr-pg uses synchronous libpq calls accordingly. Async
 support would require an interface change in alfi core.
 
 ---

@@ -1,4 +1,4 @@
-# chatter-pg
+# nasr-pg
 
 A standalone PostgreSQL driver for the [Alfi](https://github.com/AbdulKadir-22/Alfi) HTTP framework's database layer.
 
@@ -26,8 +26,8 @@ Implements `alfi::db::Driver` and `alfi::db::Connection` backed by [libpq](https
 ## Build
 
 ```bash
-git clone https://github.com/AbdulKadir-22/chatter-pg.git
-cd chatter-pg
+git clone https://github.com/alfi-framework/nasr-pg.git
+cd nasr-pg
 
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
@@ -36,7 +36,7 @@ cmake --build build
 ## Usage
 
 ```cpp
-#include <chatterpg/chatterpg.hpp>
+#include <nasrpg/nasrpg.hpp>
 #include <alfi/db/driver_registry.hpp>
 #include <alfi/db/param.hpp>
 
@@ -44,7 +44,7 @@ using namespace alfi::db;
 
 int main() {
     // Register the Postgres driver.
-    DriverRegistry::registerDriver(std::make_shared<chatterpg::PgDriver>());
+    DriverRegistry::registerDriver(std::make_shared<nasrpg::PgDriver>());
 
     // Connect via the registry (or directly via PgDriver::connect).
     auto conn = DriverRegistry::get("postgres")
@@ -74,17 +74,17 @@ int main() {
 
 ### CMake Integration
 
-To use chatter-pg in your own CMake project:
+To use nasr-pg in your own CMake project:
 
 ```cmake
 FetchContent_Declare(
-    chatterpg
-    GIT_REPOSITORY https://github.com/AbdulKadir-22/chatter-pg.git
+    nasrpg
+    GIT_REPOSITORY https://github.com/alfi-framework/nasr-pg.git
     GIT_TAG        main  # or a specific commit/tag
 )
-FetchContent_MakeAvailable(chatterpg)
+FetchContent_MakeAvailable(nasrpg)
 
-target_link_libraries(your_app PRIVATE chatterpg)
+target_link_libraries(your_app PRIVATE nasrpg)
 ```
 
 ## Running Tests
@@ -93,7 +93,7 @@ Tests require a real PostgreSQL instance:
 
 ```bash
 # 1. Start Postgres (Docker)
-docker run --name chatterpg-test-db \
+docker run --name nasrpg-test-db \
   -e POSTGRES_USER=testuser \
   -e POSTGRES_PASSWORD=testpass \
   -e POSTGRES_DB=testdb \
@@ -101,7 +101,7 @@ docker run --name chatterpg-test-db \
   -d postgres:16
 
 # 2. Set the DSN
-export CHATTERPG_TEST_DSN="postgres://testuser:testpass@localhost:5432/testdb"
+export NASRPG_TEST_DSN="postgres://testuser:testpass@localhost:5432/testdb"
 
 # 3. Build with tests enabled (default)
 cmake -B build
@@ -111,42 +111,50 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-If `CHATTERPG_TEST_DSN` is not set, tests **skip** rather than fail.
+If `NASRPG_TEST_DSN` is not set, tests **skip** rather than fail.
 
 ## Project Structure
 
 ```
-chatter-pg/
+nasr-pg/
 ├── CMakeLists.txt                    # Root build config
 ├── cmake/
 │   └── FetchDependencies.cmake       # Fetches alfi core + Catch2, finds libpq
 ├── include/
-│   └── chatterpg/
-│       ├── chatterpg.hpp             # Umbrella header
+│   └── nasrpg/
+│       ├── nasrpg.hpp             # Umbrella header
 │       ├── pg_driver.hpp             # PgDriver : alfi::db::Driver
 │       └── pg_connection.hpp         # PgConnection : alfi::db::Connection
 ├── src/
-│   └── chatterpg/
+│   └── nasrpg/
 │       ├── pg_driver.cpp
 │       └── pg_connection.cpp
 ├── tests/
 │   ├── CMakeLists.txt
 │   └── test_pg_connection.cpp        # Integration tests (real Postgres)
 ├── docs/
-│   └── DECISIONS.md                  # Design decisions & type mapping
+│   ├── OVERVIEW.md                   # Documentation index & summary
+│   ├── USER_GUIDE.md                 # Guide for library consumers
+│   ├── DEVELOPER_GUIDE.md            # Guide for maintainers & contributors
+│   ├── ARCHITECTURE.md               # System design & complete job catalog
+│   ├── CONNECTION_AND_POOLING.md     # libpq connection details & pooling analysis
+│   ├── ERROR_HANDLING.md             # Exception guarantees & SQLSTATE error mapping
+│   └── DECISIONS.md                  # Design decisions & pinned dependencies
 ├── README.md
 └── LICENSE
 ```
 
-## Design Decisions
+## Documentation
 
-See [docs/DECISIONS.md](docs/DECISIONS.md) for:
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
-- Pinned alfi core version
-- PostgreSQL → Value type mapping table
-- Deliberately unsupported types (arrays, jsonb, timestamps, etc.)
-- Transaction implementation details
-- Interface fitness notes (pooling, prepared statements, async)
+- **[OVERVIEW.md](docs/OVERVIEW.md)** — Documentation index and framework summary
+- **[USER_GUIDE.md](docs/USER_GUIDE.md)** — Integration, usage examples, dynamic queries, transactions
+- **[DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)** — Building, testing, extending type mappings
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Architecture diagram and complete catalog of every job performed
+- **[CONNECTION_AND_POOLING.md](docs/CONNECTION_AND_POOLING.md)** — Connection mechanics and pooling analysis
+- **[ERROR_HANDLING.md](docs/ERROR_HANDLING.md)** — Complete inventory of error handling and SQLSTATE codes
+- **[DECISIONS.md](docs/DECISIONS.md)** — Architectural decision records and pinned versions
 
 ## License
 

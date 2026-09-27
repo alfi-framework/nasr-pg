@@ -1,8 +1,8 @@
 /// @file test_pg_connection.cpp
-/// Integration tests for chatter-pg against a real PostgreSQL instance.
+/// Integration tests for nasr-pg against a real PostgreSQL instance.
 ///
-/// Requires CHATTERPG_TEST_DSN environment variable to be set, e.g.:
-///   export CHATTERPG_TEST_DSN="postgres://testuser:testpass@localhost:5432/testdb"
+/// Requires NASRPG_TEST_DSN environment variable to be set, e.g.:
+///   export NASRPG_TEST_DSN="postgres://testuser:testpass@localhost:5432/testdb"
 ///
 /// If the env var is not set, ALL tests in this file are SKIPPED (not failed).
 
@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include <chatterpg/chatterpg.hpp>
+#include <nasrpg/nasrpg.hpp>
 #include <alfi/db/db_error.hpp>
 #include <alfi/db/driver_registry.hpp>
 #include <alfi/db/param.hpp>
@@ -26,9 +26,9 @@ using namespace alfi::db;
 // Helper: get DSN from environment, or SKIP if not set.
 // ---------------------------------------------------------------------------
 static std::string getDsn() {
-    const char* dsn = std::getenv("CHATTERPG_TEST_DSN");
+    const char* dsn = std::getenv("NASRPG_TEST_DSN");
     if (!dsn || dsn[0] == '\0') {
-        SKIP("CHATTERPG_TEST_DSN not set — skipping integration tests. "
+        SKIP("NASRPG_TEST_DSN not set — skipping integration tests. "
              "Set it to a postgres://… DSN pointing at a test database.");
     }
     return std::string(dsn);
@@ -38,7 +38,7 @@ static std::string getDsn() {
 // Helper: get a connected PgConnection.
 // ---------------------------------------------------------------------------
 static std::unique_ptr<Connection> connect() {
-    chatterpg::PgDriver driver;
+    nasrpg::PgDriver driver;
     return driver.connect(getDsn());
 }
 
@@ -46,9 +46,9 @@ static std::unique_ptr<Connection> connect() {
 // Helper: ensure test table exists and is clean.
 // ---------------------------------------------------------------------------
 static void ensureTestTable(Connection& conn) {
-    conn.execute("DROP TABLE IF EXISTS chatterpg_test");
+    conn.execute("DROP TABLE IF EXISTS nasrpg_test");
     conn.execute(
-        "CREATE TABLE chatterpg_test ("
+        "CREATE TABLE nasrpg_test ("
         "  id SERIAL PRIMARY KEY,"
         "  name TEXT,"
         "  age INT,"
@@ -63,7 +63,7 @@ static void ensureTestTable(Connection& conn) {
 // ===========================================================================
 
 TEST_CASE("PgDriver::name() returns postgres", "[driver]") {
-    chatterpg::PgDriver driver;
+    nasrpg::PgDriver driver;
     REQUIRE(driver.name() == "postgres");
 }
 
@@ -80,7 +80,7 @@ TEST_CASE("Successful connection", "[connection]") {
 }
 
 TEST_CASE("Connection failure with bad DSN throws DbError", "[connection][error]") {
-    chatterpg::PgDriver driver;
+    nasrpg::PgDriver driver;
     REQUIRE_THROWS_AS(
         driver.connect("postgres://nobody:wrong@127.0.0.1:1/nonexistent"),
         DbError);
@@ -92,18 +92,18 @@ TEST_CASE("Parameterized INSERT and SELECT round-trip", "[query]") {
 
     // INSERT
     conn->execute(
-        "INSERT INTO chatterpg_test (name, age, score, active, bio) "
+        "INSERT INTO nasrpg_test (name, age, score, active, bio) "
         "VALUES ($1, $2, $3, $4, $5)",
         {Param("Alice"), Param(30), Param(95.5), Param(true), Param("A bio")});
 
     conn->execute(
-        "INSERT INTO chatterpg_test (name, age, score, active, bio) "
+        "INSERT INTO nasrpg_test (name, age, score, active, bio) "
         "VALUES ($1, $2, $3, $4, $5)",
         {Param("Bob"), Param(25), Param(82.3), Param(false), Param::null()});
 
     // SELECT all
     auto result = conn->execute(
-        "SELECT name, age, score, active, bio FROM chatterpg_test ORDER BY name");
+        "SELECT name, age, score, active, bio FROM nasrpg_test ORDER BY name");
 
     REQUIRE(result.rowCount() == 2);
 
@@ -123,13 +123,13 @@ TEST_CASE("Parameterized INSERT and SELECT round-trip", "[query]") {
 
     // Parameterized SELECT
     auto filtered = conn->execute(
-        "SELECT name FROM chatterpg_test WHERE age > $1",
+        "SELECT name FROM nasrpg_test WHERE age > $1",
         {Param(27)});
     REQUIRE(filtered.rowCount() == 1);
     REQUIRE(filtered[0][0].asString() == "Alice");
 
     // Cleanup
-    conn->execute("DROP TABLE IF EXISTS chatterpg_test");
+    conn->execute("DROP TABLE IF EXISTS nasrpg_test");
 }
 
 TEST_CASE("NULL value handling", "[query][null]") {
@@ -138,19 +138,19 @@ TEST_CASE("NULL value handling", "[query][null]") {
 
     // Insert a row with several NULLs.
     conn->execute(
-        "INSERT INTO chatterpg_test (name, age, score, active, bio) "
+        "INSERT INTO nasrpg_test (name, age, score, active, bio) "
         "VALUES ($1, $2, $3, $4, $5)",
         {Param::null(), Param::null(), Param::null(), Param::null(), Param::null()});
 
     auto result = conn->execute(
-        "SELECT name, age, score, active, bio FROM chatterpg_test");
+        "SELECT name, age, score, active, bio FROM nasrpg_test");
 
     REQUIRE(result.rowCount() == 1);
     for (std::size_t c = 0; c < result.columns.size(); ++c) {
         REQUIRE(result[0][c].isNull());
     }
 
-    conn->execute("DROP TABLE IF EXISTS chatterpg_test");
+    conn->execute("DROP TABLE IF EXISTS nasrpg_test");
 }
 
 TEST_CASE("Query syntax error throws DbError", "[query][error]") {
@@ -166,18 +166,18 @@ TEST_CASE("Transaction BEGIN + COMMIT persists data", "[transaction]") {
 
     conn->beginTransaction();
     conn->execute(
-        "INSERT INTO chatterpg_test (name, age) VALUES ($1, $2)",
+        "INSERT INTO nasrpg_test (name, age) VALUES ($1, $2)",
         {Param("Carol"), Param(40)});
     conn->commit();
 
     // Data should persist after commit.
     auto result = conn->execute(
-        "SELECT name FROM chatterpg_test WHERE name = $1",
+        "SELECT name FROM nasrpg_test WHERE name = $1",
         {Param("Carol")});
     REQUIRE(result.rowCount() == 1);
     REQUIRE(result[0][0].asString() == "Carol");
 
-    conn->execute("DROP TABLE IF EXISTS chatterpg_test");
+    conn->execute("DROP TABLE IF EXISTS nasrpg_test");
 }
 
 TEST_CASE("Transaction BEGIN + ROLLBACK undoes write", "[transaction]") {
@@ -186,17 +186,17 @@ TEST_CASE("Transaction BEGIN + ROLLBACK undoes write", "[transaction]") {
 
     // Insert baseline data outside of the transaction we'll rollback.
     conn->execute(
-        "INSERT INTO chatterpg_test (name, age) VALUES ($1, $2)",
+        "INSERT INTO nasrpg_test (name, age) VALUES ($1, $2)",
         {Param("Dan"), Param(50)});
 
     conn->beginTransaction();
     conn->execute(
-        "INSERT INTO chatterpg_test (name, age) VALUES ($1, $2)",
+        "INSERT INTO nasrpg_test (name, age) VALUES ($1, $2)",
         {Param("Eve"), Param(28)});
 
     // Verify Eve is visible inside the transaction.
     auto during = conn->execute(
-        "SELECT name FROM chatterpg_test WHERE name = $1",
+        "SELECT name FROM nasrpg_test WHERE name = $1",
         {Param("Eve")});
     REQUIRE(during.rowCount() == 1);
 
@@ -204,22 +204,22 @@ TEST_CASE("Transaction BEGIN + ROLLBACK undoes write", "[transaction]") {
 
     // Eve should NOT exist after rollback.
     auto after = conn->execute(
-        "SELECT name FROM chatterpg_test WHERE name = $1",
+        "SELECT name FROM nasrpg_test WHERE name = $1",
         {Param("Eve")});
     REQUIRE(after.rowCount() == 0);
 
     // Dan (committed before the transaction) should still exist.
     auto dan = conn->execute(
-        "SELECT name FROM chatterpg_test WHERE name = $1",
+        "SELECT name FROM nasrpg_test WHERE name = $1",
         {Param("Dan")});
     REQUIRE(dan.rowCount() == 1);
 
-    conn->execute("DROP TABLE IF EXISTS chatterpg_test");
+    conn->execute("DROP TABLE IF EXISTS nasrpg_test");
 }
 
 TEST_CASE("DriverRegistry integration", "[driver][registry]") {
     // Register PgDriver and retrieve it by name.
-    DriverRegistry::registerDriver(std::make_shared<chatterpg::PgDriver>());
+    DriverRegistry::registerDriver(std::make_shared<nasrpg::PgDriver>());
 
     auto driver = DriverRegistry::get("postgres");
     REQUIRE(driver != nullptr);
@@ -279,19 +279,19 @@ TEST_CASE("affectedRows on INSERT/UPDATE/DELETE", "[query]") {
     ensureTestTable(*conn);
 
     auto ins = conn->execute(
-        "INSERT INTO chatterpg_test (name, age) VALUES ($1, $2)",
+        "INSERT INTO nasrpg_test (name, age) VALUES ($1, $2)",
         {Param("Fay"), Param(33)});
     REQUIRE(ins.affectedRows == 1);
 
     auto upd = conn->execute(
-        "UPDATE chatterpg_test SET age = $1 WHERE name = $2",
+        "UPDATE nasrpg_test SET age = $1 WHERE name = $2",
         {Param(34), Param("Fay")});
     REQUIRE(upd.affectedRows == 1);
 
     auto del = conn->execute(
-        "DELETE FROM chatterpg_test WHERE name = $1",
+        "DELETE FROM nasrpg_test WHERE name = $1",
         {Param("Fay")});
     REQUIRE(del.affectedRows == 1);
 
-    conn->execute("DROP TABLE IF EXISTS chatterpg_test");
+    conn->execute("DROP TABLE IF EXISTS nasrpg_test");
 }

@@ -1,6 +1,6 @@
 # tests/CMakeLists.txt
 #
-# Integration tests for chatter-pg.
+# Integration tests for nasr-pg.
 #
 # These tests require a real PostgreSQL instance. They do NOT mock libpq.
 #
@@ -8,7 +8,7 @@
 #
 # 1. Start a Postgres instance (Docker is easiest):
 #
-#    docker run --name chatterpg-test-db \
+#    docker run --name nasrpg-test-db \
 #      -e POSTGRES_USER=testuser \
 #      -e POSTGRES_PASSWORD=testpass \
 #      -e POSTGRES_DB=testdb \
@@ -17,13 +17,13 @@
 #
 # 2. Set the DSN environment variable:
 #
-#    export CHATTERPG_TEST_DSN="postgres://testuser:testpass@localhost:5432/testdb"
+#    export NASRPG_TEST_DSN="postgres://testuser:testpass@localhost:5432/testdb"
 #
 # 3. Build and run:
 #
 #    cmake --build build && ctest --test-dir build --output-on-failure
 #
-# If CHATTERPG_TEST_DSN is not set, the tests will SKIP (not fail),
+# If NASRPG_TEST_DSN is not set, the tests will SKIP (not fail),
 # so CI without a Postgres service just shows them as skipped.
 
 find_package(Catch2 3 QUIET)
@@ -38,7 +38,7 @@ add_executable(test_pg_connection
 
 target_link_libraries(test_pg_connection
     PRIVATE
-        chatterpg
+        nasrpg
         Catch2::Catch2WithMain
 )
 

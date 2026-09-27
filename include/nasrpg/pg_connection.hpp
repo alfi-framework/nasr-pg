@@ -13,7 +13,7 @@
 struct pg_conn;
 typedef struct pg_conn PGconn;
 
-namespace chatterpg {
+namespace nasrpg {
 
 /// PgConnection is the Alfi database Connection implementation for PostgreSQL.
 ///
@@ -71,4 +71,4 @@ private:
     void executeSimple(const std::string& sql);
 };
 
-} // namespace chatterpg
+} // namespace nasrpg

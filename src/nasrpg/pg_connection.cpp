@@ -1,4 +1,4 @@
-#include "chatterpg/pg_connection.hpp"
+#include "nasrpg/pg_connection.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -11,7 +11,7 @@
 #include <alfi/db/db_error.hpp>
 #include <alfi/db/value.hpp>
 
-namespace chatterpg {
+namespace nasrpg {
 
 // ---- Construction / Destruction / Move ------------------------------------
 
@@ -265,4 +265,4 @@ void PgConnection::rollback() {
     executeSimple("ROLLBACK");
 }
 
-} // namespace chatterpg
+} // namespace nasrpg

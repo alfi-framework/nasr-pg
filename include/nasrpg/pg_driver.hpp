@@ -5,7 +5,7 @@
 
 #include <alfi/db/driver.hpp>
 
-namespace chatterpg {
+namespace nasrpg {
 
 /// PgDriver is the Alfi database Driver implementation for PostgreSQL.
 ///
@@ -27,4 +27,4 @@ public:
     std::unique_ptr<alfi::db::Connection> connect(const std::string& dsn) override;
 };
 
-} // namespace chatterpg
+} // namespace nasrpg
