@@ -15,6 +15,7 @@ add_library(nasrpg
     src/nasrpg/pg_driver.cpp
     src/nasrpg/pg_connection.cpp
 )
+add_library(nasr-pg ALIAS nasrpg)
 
 target_include_directories(nasrpg PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

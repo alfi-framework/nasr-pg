@@ -19,23 +19,28 @@ find_package(PkgConfig REQUIRED)
 #
 # Pin to a specific commit so nasr-pg isn't silently broken by future
 # alfi core changes. Update the GIT_TAG when adopting a new interface version.
-FetchContent_Declare(
-    alfi_core
-    GIT_REPOSITORY https://github.com/AbdulKadir-22/Alfi.git
-    GIT_TAG        1c63ebee3adad43b9270edd5bd29b50bf0307a03
-)
+if(TARGET alfi)
+    add_library(alfi_db_interface INTERFACE)
+    target_link_libraries(alfi_db_interface INTERFACE alfi)
+else()
+    FetchContent_Declare(
+        alfi_core
+        GIT_REPOSITORY https://github.com/alfi-framework/Alfi.git
+        GIT_TAG        main
+    )
 
-# Populate without calling add_subdirectory — we only need the headers.
-FetchContent_GetProperties(alfi_core)
-if(NOT alfi_core_POPULATED)
-    FetchContent_Populate(alfi_core)
+    # Populate without calling add_subdirectory — we only need the headers.
+    FetchContent_GetProperties(alfi_core)
+    if(NOT alfi_core_POPULATED)
+        FetchContent_Populate(alfi_core)
+    endif()
+
+    # Create a header-only INTERFACE target for the db/ headers.
+    add_library(alfi_db_interface INTERFACE)
+    target_include_directories(alfi_db_interface INTERFACE
+        ${alfi_core_SOURCE_DIR}/include
+    )
 endif()
-
-# Create a header-only INTERFACE target for the db/ headers.
-add_library(alfi_db_interface INTERFACE)
-target_include_directories(alfi_db_interface INTERFACE
-    ${alfi_core_SOURCE_DIR}/include
-)
 
 # ---------------------------------------------------------------------------
 # libpq (PostgreSQL C client library) — must be installed on the system
